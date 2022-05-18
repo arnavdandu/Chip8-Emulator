@@ -46,6 +46,8 @@ private:
 	void Table8();
 	void TableE();
 	void TableF();
+	bit8 Vx();
+	bit8 Vy();
 
 	// Following opcode implementations are based from http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/designs/Chip8.pdf
 
@@ -186,14 +188,15 @@ private:
 	// LD Vx, [I] - Fills V0 to VX with values from memory starting at address I. I is then set to I + x + 1.
 	void OP_Fx65();
 
-	std::random_device randDevice;
+	std::random_device rd;
+	std::mt19937 mt;
 	std::uniform_int_distribution<bit8> randByte;
 
 	bit8 registers[16]{};
 	bit8 memory[4096]{};
 	bit16 index{};
 	bit16 pc{};
-	bit16 stack{};
+	bit16 stack[16]{};
 	bit8 sp{};
 	bit8 delayTimer{};
 	bit8 soundTimer{};

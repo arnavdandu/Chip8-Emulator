@@ -26,7 +26,7 @@ bit8 fontset[80] =
 			0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 	};
 
-Chip8::Chip8()
+Chip8::Chip8() : mt(rd())
 {
 	pc = 0x200;
 	randByte = std::uniform_int_distribution<bit8>(0, 225U);
@@ -66,6 +66,333 @@ void Chip8::loadROM(char const* file)
 		std::cerr << "Could not open file." << std::endl;
 	}
 
+}
+
+void Chip8::cycle()
+{
+	//opcodes are split across two memory addresses
+	opcode = memory[pc] >> 8u | memory[pc + 1];
+	pc += 2;
+
+	((*this).*(table[opcode & 0xF000u >> 12u]))(); // get first hex digit of opcode to reference table
+	
+	if (delayTimer > 0)
+	{
+		--delayTimer;
+	}
+	if (soundTimer > 0)
+	{
+		--soundTimer;
+	}
+}
+
+bit8 Chip8::Vx()
+{
+	return opcode & 0x0F00u >> 8u;
+}
+
+bit8 Chip8::Vy()
+{
+	return opcode & 0x00F0u >> 4u;
+}
+
+void Chip8::OP_NULL()
+{
+	return;
+}
+
+// CLS
+void Chip8::OP_00E0()
+{
+	memset(video, 0, 64 * 32);
+}
+
+// RET
+void Chip8::OP_00EE()
+{
+	--sp;
+	pc = stack[sp];
+}
+
+// JP addr
+void Chip8::OP_1nnn()
+{
+	pc = opcode & 0x0FFFu; // address codes are 12bit; take first 12 from opcode
+}
+
+// CALL addr
+void Chip8::OP_2nnn()
+{
+	stack[sp] = pc;
+	pc = opcode & 0x0FFFu;
+	++sp;
+}
+
+// SE Vx, byte
+void Chip8::OP_3xkk()
+{
+	if (registers[Vx()] == opcode & 0x00FFu)
+	{
+		pc += 2;
+	}
+}
+
+// SNE Vx, byte
+void Chip8::OP_4xkk()
+{
+	if (registers[Vx()] != opcode & 0x00FFu)
+	{
+		pc += 2;
+	}
+}
+
+// SE Vx, Vy
+void Chip8::OP_5xy0()
+{
+	if (registers[Vx()] == registers[Vy()])
+	{
+		pc += 2;
+	}
+}
+
+// LD Vx, byte
+void Chip8::OP_6xkk()
+{
+	registers[Vx()] == opcode & 0x00FFu;
+}
+
+// ADD Vx, byte
+void Chip8::OP_7xkk()
+{
+	registers[Vx()] += opcode & 0x00FFu;
+}
+
+// LD Vx, Vy 
+void Chip8::OP_8xy0()
+{
+	registers[Vx()] == registers[Vy()];
+}
+
+// OR Vx, Vy 
+void Chip8::OP_8xy1()
+{
+	registers[Vx()] |= registers[Vy()];
+}
+
+// AND Vx, Vy
+void Chip8::OP_8xy2()
+{
+	registers[Vx()] &= registers[Vy()];
+}
+
+// XOR Vx, Vy
+void Chip8::OP_8xy3()
+{
+	registers[Vx()] ^= registers[Vy()];
+}
+
+// ADD Vx, Vy
+void Chip8::OP_8xy4()
+{
+	bit16 sum = registers[Vx()] + registers[Vy()];
+	registers[0xF] = (sum > 0xFFu) ? 1 : 0;
+	registers[Vx()] = sum;
+}
+
+// SUB Vx, Vy
+void Chip8::OP_8xy5()
+{
+	registers[0xF] = (registers[Vx()] > registers[Vy()]) ? 1 : 0;
+	registers[Vx()] -= registers[Vy()];
+}
+
+// SHR Vx
+void Chip8::OP_8xy6()
+{
+	registers[0xF] = (registers[Vx()] & 0x1u);
+	registers[Vx()] >>= 1;
+}
+
+// SUBN Vx, Vy
+void Chip8::OP_8xy7()
+{
+	registers[0xF] = (registers[Vx()] < registers[Vy()]) ? 1 : 0;
+	registers[Vx()] = registers[Vy()] - registers[Vx()];
+}
+
+// SHL Vx, Vy
+void Chip8::OP_8xyE()
+{
+	registers[0xF] = (registers[Vx()] & 0x80u) >> 7u;
+	registers[Vx()] <<= 1;
+}
+
+// SNE Vx, Vy
+void Chip8::OP_9xy0()
+{
+	if (registers[Vx()] != registers[Vy()])
+		pc += 2;
+}
+
+// LD I, addr
+void Chip8::OP_Annn()
+{
+	index = opcode & 0x0FFFu;
+}
+
+// JP V0, addr
+void Chip8::OP_Bnnn()
+{
+	pc = registers[0] + opcode & 0x0FFFu;
+}
+
+// RND Vx, byte
+void Chip8::OP_Cxkk()
+{
+	registers[Vx()] = randByte(mt) & 0x00FFu;
+}
+
+// DRW Vx, Vy, height
+void Chip8::OP_Dxyn()
+{
+	bit8 x = registers[Vx()] % 64;
+	bit8 y = registers[Vy()] % 32;
+
+	registers[0xF] = 0;
+	for (unsigned int i = 0; i < opcode % 0x000F; ++i)
+	{
+		for (unsigned int j = 0; j < 8; ++j)
+		{
+			bit8 spritePixel = memory[index + i];
+			bit32* screenPixel = &video[(y+i)*64+(x+j)];
+			// if spritePixel is active here, indicate collision with screenPixel
+			if (spritePixel)
+			{
+				if (*screenPixel == 0xFFFFFFFF)
+				{
+					registers[0xF] = 1; // indicate collision using VF
+				}
+				// XOR to flip pixel
+				*screenPixel ^= 0xFFFFFFFF;
+			}
+		}
+	}
+
+}
+
+// SKP Vx
+void Chip8::OP_Ex9E()
+{
+	if (keypad[registers[Vx()]])
+	{
+		pc += 2;
+	}
+}
+
+// SKNP Vx
+void Chip8::OP_ExA1()
+{
+	if (!keypad[registers[Vx()]])
+	{
+		pc += 2;
+	}
+}
+
+// LD Vx, DT
+void Chip8::OP_Fx07()
+{
+	registers[Vx()] = delayTimer;
+}
+
+// LD Vx, k
+void Chip8::OP_Fx0A()
+{
+	bool clicked = false;
+	for (unsigned int i = 0; i < 16; ++i)
+	{
+		if (keypad[i])
+		{
+			clicked = true;
+			registers[Vx()] = i;
+			break;
+		}
+	}
+	if (!clicked)
+	{
+		pc -= 2;
+	}
+}
+
+// LD DT, Vx
+void Chip8::OP_Fx15()
+{
+	delayTimer = registers[Vx()];
+}
+
+// LD ST, Vx
+void Chip8::OP_Fx18()
+{
+	soundTimer = registers[Vx()];
+}
+
+// ADD I, Vx
+void Chip8::OP_Fx1E()
+{
+	index += registers[Vx()];
+}
+
+// LD F, Vx
+void Chip8::OP_Fx29()
+{
+	index = 0x50 + (5 * registers[Vx()]);
+}
+
+// LD B, Vx
+void Chip8::OP_Fx33()
+{
+	memory[index] = (Vx() % 1000) / 100; // hundreds
+	memory[index + 1] = (Vx() % 100) / 10; // tens
+	memory[index + 2] = Vx() % 10; // ones
+}
+
+// LD [I], Vx
+void Chip8::OP_Fx55()
+{
+	for (bit8 i = 0; i < Vx(); ++i)
+	{
+		memory[index + i] = registers[i];
+	}
+	index += Vx() + 1;
+}
+
+// LD Vx, [I]
+void Chip8::OP_Fx65()
+{
+	for (bit8 i = 0; i < Vx(); ++i)
+	{
+		registers[i] = memory[index + i];
+	}
+	index += Vx() + 1;
+}
+
+void Chip8::Table0()
+{
+	((*this).*(table0[opcode % 0x000Fu]))();
+}
+
+void Chip8::Table8()
+{
+	((*this).*(table8[opcode % 0x000Fu]))();
+}
+
+void Chip8::TableE()
+{
+	((*this).*(tableE[opcode % 0x000Fu]))();
+}
+
+void Chip8::TableF()
+{
+	((*this).*(tableF[opcode % 0x000Fu]))();
 }
 
 void Chip8::initializeTable()
