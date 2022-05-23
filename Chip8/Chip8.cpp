@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <SFML/Graphics.hpp>
 
 bit8 fontset[80] = 
 	{
@@ -29,7 +30,7 @@ bit8 fontset[80] =
 Chip8::Chip8() : mt(rd())
 {
 	pc = 0x200;
-	randByte = std::uniform_int_distribution<bit8>(0, 225U);
+	randByte = std::uniform_int_distribution<>(0, 225U);
 
 	for (unsigned int i = 0; i < 80; ++i)
 	{
@@ -131,7 +132,7 @@ void Chip8::OP_2nnn()
 // SE Vx, byte
 void Chip8::OP_3xkk()
 {
-	if (registers[Vx()] == opcode & 0x00FFu)
+	if (registers[Vx()] == (opcode & 0x00FFu))
 	{
 		pc += 2;
 	}
@@ -140,7 +141,7 @@ void Chip8::OP_3xkk()
 // SNE Vx, byte
 void Chip8::OP_4xkk()
 {
-	if (registers[Vx()] != opcode & 0x00FFu)
+	if (registers[Vx()] != (opcode & 0x00FFu))
 	{
 		pc += 2;
 	}
@@ -158,19 +159,19 @@ void Chip8::OP_5xy0()
 // LD Vx, byte
 void Chip8::OP_6xkk()
 {
-	registers[Vx()] == opcode & 0x00FFu;
+	registers[Vx()] = (opcode & 0x00FFu);
 }
 
 // ADD Vx, byte
 void Chip8::OP_7xkk()
 {
-	registers[Vx()] += opcode & 0x00FFu;
+	registers[Vx()] += (opcode & 0x00FFu);
 }
 
 // LD Vx, Vy 
 void Chip8::OP_8xy0()
 {
-	registers[Vx()] == registers[Vy()];
+	registers[Vx()] = registers[Vy()];
 }
 
 // OR Vx, Vy 
@@ -259,21 +260,27 @@ void Chip8::OP_Dxyn()
 	bit8 y = registers[Vy()] % 32;
 
 	registers[0xF] = 0;
-	for (unsigned int i = 0; i < opcode % 0x000F; ++i)
+	for (unsigned int i = 0; i < (opcode % 0x000F); i+=4)
 	{
-		for (unsigned int j = 0; j < 8; ++j)
+		for (unsigned int j = 0; j < 32; j+=4)
 		{
 			bit8 spritePixel = memory[index + i];
-			bit32* screenPixel = &video[(y+i)*64+(x+j)];
+			sf::Uint8* screenPixel = &video[(y + i) * 64 + (x + j)];
+			sf::Uint8* screenPixel1 = &video[(y + i) * 64 + (x + j)+1];
+			sf::Uint8* screenPixel2 = &video[(y + i) * 64 + (x + j)+2];
+			sf::Uint8* screenPixel3 = &video[(y + i) * 64 + (x + j)+3];
 			// if spritePixel is active here, indicate collision with screenPixel
 			if (spritePixel)
 			{
-				if (*screenPixel == 0xFFFFFFFF)
+				if (*screenPixel == 0xFF)
 				{
 					registers[0xF] = 1; // indicate collision using VF
 				}
 				// XOR to flip pixel
-				*screenPixel ^= 0xFFFFFFFF;
+				*screenPixel ^= 0xFF;
+				*screenPixel1 ^= 0xFF;
+				*screenPixel2 ^= 0xFF;
+				*screenPixel3 ^= 0xFF;
 			}
 		}
 	}

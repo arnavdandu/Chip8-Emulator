@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <random>
+#include <SFML/Graphics.hpp>
 
 // renamed unsigned integers that represent bits for clarity.
 typedef uint8_t bit8;
@@ -36,7 +37,8 @@ public:
 
 	//public so they can be accessed by the Display class
 	bit8 keypad[16]{};
-	bit32 video[64 * 32]{};
+	sf::Uint8 video[64 * 32 * 4]{};
+
 private:
 	//These functions will dereference the pointer to the opcode functions for their table.
 	//For example, when opcode=0x00E0, table0[(0x00E0 & 0x000F)] = table0[(0x0)], which returns a pointer to Chip8::OP_00E0
@@ -190,7 +192,7 @@ private:
 
 	std::random_device rd;
 	std::mt19937 mt;
-	std::uniform_int_distribution<bit8> randByte;
+	std::uniform_int_distribution<> randByte;
 
 	bit8 registers[16]{};
 	bit8 memory[4096]{};
