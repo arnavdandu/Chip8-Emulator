@@ -2,6 +2,8 @@
 #include "Display.h"
 #include <chrono>
 #include <iostream>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 
 int main(int argc, char** argv)
 {
@@ -20,8 +22,6 @@ int main(int argc, char** argv)
 	Chip8 chip8;
 	chip8.loadROM(romFilename);
 
-	int videoPitch = sizeof(chip8.video[0]) * 64;
-
 	auto lastCycleTime = std::chrono::high_resolution_clock::now();
 	bool quit = false;
 
@@ -37,7 +37,6 @@ int main(int argc, char** argv)
 			lastCycleTime = currentTime;
 
 			chip8.cycle();
-
 			display.updateDisplay(chip8.video);
 		}
 	}

@@ -4,21 +4,47 @@
 
 // References: https://www.sfml-dev.org/tutorials/2.5/
 
+sf::RenderWindow window;
+sf::Texture texture;
+sf::Sprite sprite;
+sf::Uint8* pixels = new sf::Uint8[64 * 32 * 4]{};
+
 Display::Display(const char* name, int winW, int winH, int texW, int texH)
-	: window(sf::VideoMode(winW, winH), name) 
 {
+	window.create(sf::VideoMode(winW, winH), name);
 	if (!texture.create(texW, texH))
 	{
-		std::cerr << "Could not load initial texture" << std::endl;
-		return;
+		std::cerr << "Could not create texture" << std::endl;
 	}
-	sprite = sf::Sprite(texture);
-	window.draw(sprite);
+	sprite.setScale(sf::Vector2f(10.0, 10.0));
+	window.clear(sf::Color::Black);
+	window.display();
 }
 
-void Display::updateDisplay(const sf::Uint8* video)
+void Display::updateDisplay(const uint32_t* video)
 {
-	texture.update(video);
+	window.clear(sf::Color::Black);
+	for (int i = 0; i < 64 * 32 * 4; i+=4)
+	{
+		if (video[i/4] == 0xFFFFFFFF)
+		{
+			pixels[i] = 0xFF;
+			pixels[i+1] = 0xFF;
+			pixels[i+2] = 0xFF;
+			pixels[i+3] = 0xFF;
+		}
+		else 
+		{
+			pixels[i] = 0x00;
+			pixels[i + 1] = 0x00;
+			pixels[i + 2] = 0x00;
+			pixels[i + 3] = 0x00;
+		}
+	}
+	texture.update(pixels);
+	sprite.setTexture(texture);
+	window.draw(sprite);
+	window.display();
 }
 
 bool Display::processInput(uint8_t* keys)

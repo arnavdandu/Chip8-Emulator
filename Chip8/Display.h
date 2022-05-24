@@ -5,11 +5,9 @@ class Display
 {
 public:
 	Display(const char* name, int winW, int winH, int texW, int texH);
-	void updateDisplay(const sf::Uint8* video);
+	void updateDisplay(const uint32_t* video);
 	bool processInput(uint8_t* keys);
+	
 private:
-	sf::RenderWindow window;
-	sf::Texture texture;
-	sf::Sprite sprite;
 };
 

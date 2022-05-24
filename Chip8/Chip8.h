@@ -4,6 +4,13 @@
 #include <random>
 #include <SFML/Graphics.hpp>
 
+const unsigned int KEY_COUNT = 16;
+const unsigned int MEMORY_SIZE = 4096;
+const unsigned int REGISTER_COUNT = 16;
+const unsigned int STACK_LEVELS = 16;
+const unsigned int VIDEO_HEIGHT = 32;
+const unsigned int VIDEO_WIDTH = 64;
+
 // renamed unsigned integers that represent bits for clarity.
 typedef uint8_t bit8;
 typedef uint16_t bit16;
@@ -37,13 +44,12 @@ public:
 
 	//public so they can be accessed by the Display class
 	bit8 keypad[16]{};
-	sf::Uint8 video[64 * 32 * 4]{};
+	bit32 video[64 * 32]{};
 
 private:
 	//These functions will dereference the pointer to the opcode functions for their table.
 	//For example, when opcode=0x00E0, table0[(0x00E0 & 0x000F)] = table0[(0x0)], which returns a pointer to Chip8::OP_00E0
 	//These tables are used because many opcodes can be grouped by their starting values: 00, 8xy, Ex, or Fx
-	void initializeTable();
 	void Table0();
 	void Table8();
 	void TableE();
@@ -190,8 +196,7 @@ private:
 	// LD Vx, [I] - Fills V0 to VX with values from memory starting at address I. I is then set to I + x + 1.
 	void OP_Fx65();
 
-	std::random_device rd;
-	std::mt19937 mt;
+	std::default_random_engine randGen;
 	std::uniform_int_distribution<> randByte;
 
 	bit8 registers[16]{};
