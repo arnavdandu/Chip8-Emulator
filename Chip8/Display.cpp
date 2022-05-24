@@ -9,14 +9,14 @@ sf::Texture texture;
 sf::Sprite sprite;
 sf::Uint8* pixels = new sf::Uint8[64 * 32 * 4]{};
 
-Display::Display(const char* name, int winW, int winH, int texW, int texH)
+Display::Display(const char* name, int texW, int texH, float scale)
 {
-	window.create(sf::VideoMode(winW, winH), name);
+	window.create(sf::VideoMode(texW * scale, texH * scale), name);
 	if (!texture.create(texW, texH))
 	{
 		std::cerr << "Could not create texture" << std::endl;
 	}
-	sprite.setScale(sf::Vector2f(10.0, 10.0));
+	sprite.setScale(sf::Vector2f(scale, scale));
 	window.clear(sf::Color::Black);
 	window.display();
 }

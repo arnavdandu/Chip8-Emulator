@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	int cycleDelay = std::stoi(argv[2]);
 	char const* romFilename = argv[3];
 
-	Display display("CHIP-8 Emulator", 64 * videoScale, 32 * videoScale, 64, 32);
+	Display display("CHIP-8 Emulator", 64, 32, videoScale);
 
 	Chip8 chip8;
 	chip8.loadROM(romFilename);
