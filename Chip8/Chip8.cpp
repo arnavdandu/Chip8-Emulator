@@ -12,7 +12,7 @@ const unsigned int FONTSET_SIZE = 80;
 const unsigned int FONTSET_START_ADDRESS = 0x50;
 const unsigned int START_ADDRESS = 0x200;
 
-bit8 fontset[80] = 
+uint8_t fontset[80] = 
 	{
 			0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 			0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -131,16 +131,6 @@ void Chip8::cycle()
 	{
 		--soundTimer;
 	}
-}
-
-bit8 Chip8::Vx()
-{
-	return opcode & 0x0F00u >> 8u;
-}
-
-bit8 Chip8::Vy()
-{
-	return opcode & 0x00F0u >> 4u;
 }
 
 void Chip8::Table0()
@@ -333,7 +323,6 @@ void Chip8::OP_Dxyn()
 	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
 	uint8_t height = opcode & 0x000Fu;
-	// Wrap if going beyond screen boundaries
 	uint8_t xPos = registers[Vx] % VIDEO_WIDTH;
 	uint8_t yPos = registers[Vy] % VIDEO_HEIGHT;
 	registers[0xF] = 0;
@@ -344,15 +333,12 @@ void Chip8::OP_Dxyn()
 		{
 			uint8_t spritePixel = spriteByte & (0x80u >> col);
 			uint32_t* screenPixel = &video[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
-			// Sprite pixel is on
 			if (spritePixel)
 			{
-				// Screen pixel also on - collision
 				if (*screenPixel == 0xFFFFFFFF)
 				{
 					registers[0xF] = 1;
 				}
-				// Effectively XOR with the sprite pixel
 				*screenPixel ^= 0xFFFFFFFF;
 			}
 		}

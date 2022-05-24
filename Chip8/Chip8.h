@@ -11,10 +11,6 @@ const unsigned int STACK_LEVELS = 16;
 const unsigned int VIDEO_HEIGHT = 32;
 const unsigned int VIDEO_WIDTH = 64;
 
-// renamed unsigned integers that represent bits for clarity.
-typedef uint8_t bit8;
-typedef uint16_t bit16;
-typedef uint32_t bit32;
 
 /*
 	CPU REGISTERS: TOTAL 16, labeled V0 to VF
@@ -43,8 +39,8 @@ public:
 	void cycle();
 
 	//public so they can be accessed by the Display class
-	bit8 keypad[16]{};
-	bit32 video[64 * 32]{};
+	uint8_t keypad[16]{};
+	uint32_t video[64 * 32]{};
 
 private:
 	//These functions will dereference the pointer to the opcode functions for their table.
@@ -54,8 +50,8 @@ private:
 	void Table8();
 	void TableE();
 	void TableF();
-	bit8 Vx();
-	bit8 Vy();
+	uint8_t Vx();
+	uint8_t Vy();
 
 	// Following opcode implementations are based from http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/designs/Chip8.pdf
 
@@ -199,15 +195,15 @@ private:
 	std::default_random_engine randGen;
 	std::uniform_int_distribution<> randByte;
 
-	bit8 registers[16]{};
-	bit8 memory[4096]{};
-	bit16 index{};
-	bit16 pc{};
-	bit16 stack[16]{};
-	bit8 sp{};
-	bit8 delayTimer{};
-	bit8 soundTimer{};
-	bit16 opcode;
+	uint8_t registers[16]{};
+	uint8_t memory[4096]{};
+	uint16_t index{};
+	uint16_t pc{};
+	uint16_t stack[16]{};
+	uint8_t sp{};
+	uint8_t delayTimer{};
+	uint8_t soundTimer{};
+	uint16_t opcode;
 
 	//Initialize tables of opcode function pointers - need typedef so it doesn't look stupid :)
 	//By default, these tables will be filled by reference to OP_NULL, which does nothing
