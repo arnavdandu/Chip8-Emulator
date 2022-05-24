@@ -1,13 +1,9 @@
 #include "Display.h"
+#include "Chip8.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
 // References: https://www.sfml-dev.org/tutorials/2.5/
-
-sf::RenderWindow window;
-sf::Texture texture;
-sf::Sprite sprite;
-sf::Uint8* pixels = new sf::Uint8[64 * 32 * 4]{};
 
 Display::Display(const char* name, int texW, int texH, float scale)
 {

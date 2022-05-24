@@ -9,5 +9,9 @@ public:
 	bool processInput(uint8_t* keys);
 	
 private:
+	sf::RenderWindow window;
+	sf::Texture texture;
+	sf::Sprite sprite;
+	sf::Uint8* pixels = new sf::Uint8[64 * 32 * 4]{};
 };
 
