@@ -159,82 +159,82 @@ bool Display::processInput(uint8_t* keys)
 				} break;
 				case sf::Keyboard::Key::X:
 				{
-					keys[0] = 1;
+					keys[0] = 0;
 				} break;
 
 				case sf::Keyboard::Key::Num1:
 				{
-					keys[1] = 1;
+					keys[1] = 0;
 				} break;
 
 				case sf::Keyboard::Key::Num2:
 				{
-					keys[2] = 1;
+					keys[2] = 0;
 				} break;
 
 				case sf::Keyboard::Key::Num3:
 				{
-					keys[3] = 1;
+					keys[3] = 0;
 				} break;
 
 				case sf::Keyboard::Key::Q:
 				{
-					keys[4] = 1;
+					keys[4] = 0;
 				} break;
 
 				case sf::Keyboard::Key::W:
 				{
-					keys[5] = 1;
+					keys[5] = 0;
 				} break;
 
 				case sf::Keyboard::Key::E:
 				{
-					keys[6] = 1;
+					keys[6] = 0;
 				} break;
 
 				case sf::Keyboard::Key::A:
 				{
-					keys[7] = 1;
+					keys[7] = 0;
 				} break;
 
 				case sf::Keyboard::Key::S:
 				{
-					keys[8] = 1;
+					keys[8] = 0;
 				} break;
 
 				case sf::Keyboard::Key::D:
 				{
-					keys[9] = 1;
+					keys[9] = 0;
 				} break;
 
 				case sf::Keyboard::Key::Z:
 				{
-					keys[0xA] = 1;
+					keys[0xA] = 0;
 				} break;
 
 				case sf::Keyboard::Key::C:
 				{
-					keys[0xB] = 1;
+					keys[0xB] = 0;
 				} break;
 
 				case sf::Keyboard::Key::Num4:
 				{
-					keys[0xC] = 1;
+					keys[0xC] = 0;
 				} break;
 
 				case sf::Keyboard::Key::R:
 				{
-					keys[0xD] = 1;
+					keys[0xD] = 0;
 				} break;
 
 				case sf::Keyboard::Key::F:
 				{
-					keys[0xE] = 1;
+					keys[0xE] = 0;
 				} break;
 
 				case sf::Keyboard::Key::V:
 				{
-					keys[0xF] = 1;
+					keys[0xF] = 0;
 				} break;
 				}
 			} break;
