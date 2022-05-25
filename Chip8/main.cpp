@@ -2,25 +2,23 @@
 #include "Display.h"
 #include <chrono>
 #include <iostream>
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
 
 int main(int argc, char** argv)
 {
 	if (argc != 4)
 	{
-		std::cerr << "Usage: " << argv[0] << " <Scale> <Delay> <ROM>\n";
+		std::cerr << "Usage: " << argv[0] << " <Scale <Delay> <ROM>\n";
 		std::exit(EXIT_FAILURE);
 	}
 
 	int videoScale = std::stoi(argv[1]);
 	int cycleDelay = std::stoi(argv[2]);
-	char const* romFilename = argv[3];
+	std::string rom = argv[3];
 
 	Display display("CHIP-8 Emulator", 64, 32, videoScale);
 
 	Chip8 chip8;
-	chip8.loadROM(romFilename);
+	chip8.loadROM(rom);
 
 	auto lastCycleTime = std::chrono::high_resolution_clock::now();
 	bool quit = false;
@@ -37,7 +35,8 @@ int main(int argc, char** argv)
 			lastCycleTime = currentTime;
 
 			chip8.cycle();
-			display.updateDisplay(chip8.video);
+			display.updateDisplay(chip8.video, chip8.getOpcode(), chip8.getProgramCounter(), chip8.getIndex(), 
+				chip8.getStackPointer(), chip8.getDelayTimer(), chip8.getRegisters(), chip8.getStack());
 		}
 	}
 
