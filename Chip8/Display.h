@@ -20,7 +20,7 @@ private:
 	sf::Font font;
 	sf::CircleShape registerIndicators[16];
 	sf::CircleShape stackIndicators[16];
-	float scale;
+	unsigned int scale;
 
 	std::string Table0();
 	std::string Table8();

@@ -51,8 +51,8 @@ Display::Display(const char* name, int texW, int texH, float windowScale)
 	{
 		std::cerr << "Could not load font" << std::endl;
 	}
-	window.create(sf::VideoMode(texW * scale + 15 * scale, texH * scale), name);
-	if (!texture.create(texW, texH))
+	window.create(sf::VideoMode(sf::Vector2u(texW * scale + 15 * scale, texH * scale)), name);
+	if (!texture.create(sf::Vector2u(texW, texH)))
 	{
 		std::cerr << "Could not create texture" << std::endl;
 	}
